@@ -29,8 +29,7 @@
   .calendar-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 24px;
+    justify-content: space-between;
     padding: 20px 16px;
     border-bottom: 1px solid #eee;
   }
@@ -38,7 +37,11 @@
   .calendar-header h1 {
     font-size: 22px;
     font-weight: 600;
-    letter-spacing: 0.5px;
+  }
+
+  .calendar-header .nav-btns {
+    display: flex;
+    gap: 8px;
   }
 
   .calendar-header button {
@@ -57,6 +60,15 @@
   }
 
   .calendar-header button:hover { background: #f0f0f0; }
+  .add-btn {
+    width: auto !important;
+    padding: 0 14px;
+    font-size: 13px !important;
+    color: #1a56db !important;
+    border-color: #1a56db !important;
+    font-weight: 500;
+  }
+  .add-btn:hover { background: #e8f0fe !important; }
 
   .weekdays {
     display: grid;
@@ -93,14 +105,9 @@
   }
 
   .day-cell:nth-child(7n) { border-right: none; }
-
   .day-cell.other-month { background: #fafafa; }
-
   .day-cell.other-month .day-num { color: #ccc; }
-
-  .day-cell.today {
-    background: #fef9e7;
-  }
+  .day-cell.today { background: #fef9e7; }
 
   .day-num {
     font-size: 13px;
@@ -132,11 +139,15 @@
     line-height: 1.4;
     padding: 3px 6px;
     border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: box-shadow 0.15s;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    cursor: default;
   }
+
+  .event:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
 
   .event.all-day {
     background: #e8f0fe;
@@ -156,6 +167,26 @@
     vertical-align: middle;
   }
 
+  .event .delete-icon {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    line-height: 14px;
+    text-align: center;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.15);
+    color: #fff;
+    font-size: 10px;
+    display: none;
+    cursor: pointer;
+  }
+
+  .event:hover .delete-icon { display: block; }
+  .event .delete-icon:hover { background: rgba(200,0,0,0.6); }
+
   .legend {
     display: flex;
     gap: 20px;
@@ -165,20 +196,110 @@
     color: #666;
   }
 
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .legend-swatch {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-  }
-
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
   .legend-swatch.all-day { background: #e8f0fe; border-left: 3px solid #1a56db; }
   .legend-swatch.timed { background: #fce4ec; border-left: 3px solid #c62828; }
+
+  .hint {
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #999;
+    border-top: 1px solid #eee;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: #fff;
+    border-radius: 10px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+
+  .modal h3 { font-size: 17px; margin-bottom: 16px; }
+
+  .modal label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+  }
+
+  .modal input, .modal select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    font-family: inherit;
+  }
+
+  .modal .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .modal .checkbox-row input { width: auto; margin-bottom: 0; }
+
+  .modal .time-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .modal .time-row input { flex: 1; }
+
+  .modal .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .modal .btn-row button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-family: inherit;
+  }
+
+  .modal .btn-save {
+    background: #1a56db;
+    color: #fff;
+    border-color: #1a56db;
+  }
+
+  .modal .btn-delete {
+    background: #c62828;
+    color: #fff;
+    border-color: #c62828;
+  }
+
+  .modal .btn-delete.hidden { display: none; }
+
+  .day-cell.drag-over {
+    background: #e8f0fe !important;
+    outline: 2px dashed #1a56db;
+  }
 
   @media (max-width: 640px) {
     .day-cell { min-height: 72px; padding: 4px; }
@@ -189,11 +310,37 @@
 </style>
 </head>
 <body>
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modalTitle">新增事件</h3>
+    <label>标题</label>
+    <input type="text" id="evtTitle" placeholder="例如：开会">
+    <label>日期</label>
+    <input type="date" id="evtDate">
+    <div class="checkbox-row">
+      <input type="checkbox" id="evtAllDay">
+      <label for="evtAllDay" style="margin:0">全天事件</label>
+    </div>
+    <div class="time-row" id="timeRow">
+      <input type="time" id="evtTimeStart" value="09:00">
+      <input type="time" id="evtTimeEnd" value="10:00">
+    </div>
+    <div class="btn-row">
+      <button class="btn-delete hidden" id="btnDelete">删除</button>
+      <button id="btnCancel">取消</button>
+      <button class="btn-save" id="btnSave">保存</button>
+    </div>
+  </div>
+</div>
+
 <div class="calendar-container">
   <div class="calendar-header">
-    <button id="prevBtn" title="上个月">&#9664;</button>
+    <div class="nav-btns">
+      <button id="prevBtn" title="上个月">&#9664;</button>
+      <button id="nextBtn" title="下个月">&#9654;</button>
+    </div>
     <h1 id="monthTitle">2026年 7月</h1>
-    <button id="nextBtn" title="下个月">&#9654;</button>
+    <button class="add-btn" id="addBtn">+ 新增事件</button>
   </div>
   <div class="weekdays">
     <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div>
@@ -203,53 +350,85 @@
     <div class="legend-item"><span class="legend-swatch all-day"></span> 全天事件</div>
     <div class="legend-item"><span class="legend-swatch timed"></span> 定时事件</div>
   </div>
+  <div class="hint">点击事件可编辑 · 悬停事件右侧可删除 · 点击右上角"新增事件"添加</div>
 </div>
 
 <script>
-var events = [
-  { date: "2026-07-06", title: "述职答辩", allDay: false, time: "13:00-17:00" },
-  { date: "2026-07-06", title: "西语课", allDay: false, time: "19:00-20:00" },
-  { date: "2026-07-07", title: "完成注会作业", allDay: true },
-  { date: "2026-07-07", title: "完成开题答辩PPT", allDay: true },
-  { date: "2026-07-07", title: "普拉提", allDay: false, time: "18:00-19:00" },
-  { date: "2026-07-09", title: "普拉提", allDay: false, time: "18:30-19:30" },
-  { date: "2026-07-10", title: "注会作业", allDay: true },
-  { date: "2026-07-11", title: "香港账户整理", allDay: false, time: "9:00-13:00" },
-  { date: "2026-07-12", title: "开题答辩", allDay: true },
-  { date: "2026-07-16", title: "西安活动", allDay: true }
+var defaultEvents = [
+  { id: 1, date: "2026-07-06", title: "述职答辩", allDay: false, time: "13:00-17:00" },
+  { id: 2, date: "2026-07-06", title: "西语课", allDay: false, time: "19:00-20:00" },
+  { id: 3, date: "2026-07-07", title: "完成注会作业", allDay: true, time: "" },
+  { id: 4, date: "2026-07-07", title: "完成开题答辩PPT", allDay: true, time: "" },
+  { id: 5, date: "2026-07-07", title: "普拉提", allDay: false, time: "18:00-19:00" },
+  { id: 6, date: "2026-07-09", title: "普拉提", allDay: false, time: "18:30-19:30" },
+  { id: 7, date: "2026-07-10", title: "注会作业", allDay: true, time: "" },
+  { id: 8, date: "2026-07-11", title: "香港账户整理", allDay: false, time: "9:00-13:00" },
+  { id: 9, date: "2026-07-12", title: "开题答辩", allDay: true, time: "" },
+  { id: 10, date: "2026-07-16", title: "西安活动", allDay: true, time: "" }
 ];
 
+// Load from localStorage or use defaults
+var events = [];
+var stored = localStorage.getItem("schedule_events");
+if (stored) {
+  events = JSON.parse(stored);
+} else {
+  events = defaultEvents;
+  localStorage.setItem("schedule_events", JSON.stringify(events));
+}
+
+var nextId = events.length > 0 ? Math.max.apply(null, events.map(function(e) { return e.id; })) + 1 : 1;
+
+function saveEvents() {
+  localStorage.setItem("schedule_events", JSON.stringify(events));
+}
+
 var eventMap = {};
-events.forEach(function(e) {
-  if (!eventMap[e.date]) eventMap[e.date] = [];
-  eventMap[e.date].push(e);
-});
+function buildMap() {
+  eventMap = {};
+  events.forEach(function(e) {
+    if (!eventMap[e.date]) eventMap[e.date] = [];
+    eventMap[e.date].push(e);
+  });
+}
 
 var currentYear = 2026;
 var currentMonth = 7;
-
 var monthTitle = document.getElementById("monthTitle");
 var daysGrid = document.getElementById("daysGrid");
 
+// Modal elements
+var modal = document.getElementById("modal");
+var modalTitle = document.getElementById("modalTitle");
+var evtTitle = document.getElementById("evtTitle");
+var evtDate = document.getElementById("evtDate");
+var evtAllDay = document.getElementById("evtAllDay");
+var timeRow = document.getElementById("timeRow");
+var evtTimeStart = document.getElementById("evtTimeStart");
+var evtTimeEnd = document.getElementById("evtTimeEnd");
+var btnDelete = document.getElementById("btnDelete");
+var btnSave = document.getElementById("btnSave");
+var btnCancel = document.getElementById("btnCancel");
+var editingId = null;
+
 function todayStr() {
   var d = new Date();
-  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function pad(n) { return n < 10 ? "0" + n : n; }
   return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
 }
 
 function render() {
+  buildMap();
   monthTitle.textContent = currentYear + "年 " + currentMonth + "月";
   daysGrid.innerHTML = "";
 
   var firstDay = new Date(currentYear, currentMonth - 1, 1);
   var startDayOfWeek = firstDay.getDay() === 0 ? 7 : firstDay.getDay();
-
   var daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
   var daysInPrevMonth = new Date(currentYear, currentMonth - 1, 0).getDate();
+  var today = todayStr();
 
-  var todayVal = todayStr();
-
-  function pad2(n) { return n < 10 ? "0" + n : "" + n; }
+  function pad2(n) { return n < 10 ? "0" + n : n; }
 
   var i, d, m, y, dateStr;
   for (i = startDayOfWeek - 1; i > 0; i--) {
@@ -267,10 +446,10 @@ function render() {
 
   var totalCells = startDayOfWeek - 1 + daysInMonth;
   var remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  var nextM = currentMonth === 12 ? 1 : currentMonth + 1;
+  var nextY = currentMonth === 12 ? currentYear + 1 : currentYear;
   for (d = 1; d <= remaining; d++) {
-    m = currentMonth === 12 ? 1 : currentMonth + 1;
-    y = currentMonth === 12 ? currentYear + 1 : currentYear;
-    dateStr = y + "-" + pad2(m) + "-" + pad2(d);
+    dateStr = nextY + "-" + pad2(nextM) + "-" + pad2(d);
     appendDay(d, dateStr, true);
   }
 }
@@ -280,6 +459,22 @@ function appendDay(dayNum, dateStr, isOtherMonth) {
   cell.className = "day-cell";
   if (isOtherMonth) cell.classList.add("other-month");
   if (dateStr === todayStr()) cell.classList.add("today");
+
+  cell.setAttribute("data-date", dateStr);
+
+  // Drag and drop support
+  cell.addEventListener("dragover", function(ev) { ev.preventDefault(); cell.classList.add("drag-over"); });
+  cell.addEventListener("dragleave", function() { cell.classList.remove("drag-over"); });
+  cell.addEventListener("drop", function(ev) {
+    cell.classList.remove("drag-over");
+    var id = parseInt(ev.dataTransfer.getData("text/plain"));
+    var evt = events.find(function(e) { return e.id === id; });
+    if (evt && !isOtherMonth) {
+      evt.date = dateStr;
+      saveEvents();
+      render();
+    }
+  });
 
   var numEl = document.createElement("div");
   numEl.className = "day-num";
@@ -299,28 +494,142 @@ function appendDay(dayNum, dateStr, isOtherMonth) {
     if (ev.allDay) {
       el.className = "event all-day";
       el.textContent = ev.title;
-      el.title = ev.title + "（全天）";
+      el.title = ev.title + " (全天) - 点击编辑";
     } else {
       el.className = "event timed";
       el.textContent = ev.title + " " + ev.time;
-      el.title = ev.title + " " + ev.time;
+      el.title = ev.title + " " + ev.time + " - 点击编辑";
     }
+    el.setAttribute("data-id", ev.id);
+    el.draggable = true;
+    el.addEventListener("dragstart", function(ev2) { ev2.dataTransfer.setData("text/plain", ev.id.toString()); });
+
+    // Click to edit
+    el.addEventListener("click", function(e) {
+      e.stopPropagation();
+      openEditModal(ev);
+    });
+
+    // Delete icon
+    var delIcon = document.createElement("span");
+    delIcon.className = "delete-icon";
+    delIcon.textContent = "x";
+    delIcon.addEventListener("click", function(e2) {
+      e2.stopPropagation();
+      deleteEvent(ev.id);
+    });
+    el.appendChild(delIcon);
+
     cell.appendChild(el);
   });
 
   daysGrid.appendChild(cell);
 }
 
+function openAddModal(dateStr) {
+  editingId = null;
+  modalTitle.textContent = "新增事件";
+  evtTitle.value = "";
+  evtDate.value = dateStr || todayStr();
+  evtAllDay.checked = false;
+  evtTimeStart.value = "09:00";
+  evtTimeEnd.value = "10:00";
+  timeRow.style.display = "flex";
+  btnDelete.classList.add("hidden");
+  modal.classList.add("active");
+}
+
+function openEditModal(ev) {
+  editingId = ev.id;
+  modalTitle.textContent = "编辑事件";
+  evtTitle.value = ev.title;
+  evtDate.value = ev.date;
+  evtAllDay.checked = ev.allDay;
+  if (ev.allDay) {
+    timeRow.style.display = "none";
+    evtTimeStart.value = "09:00";
+    evtTimeEnd.value = "10:00";
+  } else {
+    timeRow.style.display = "flex";
+    var parts = ev.time ? ev.time.split("-") : ["09:00", "10:00"];
+    evtTimeStart.value = parts[0] || "09:00";
+    evtTimeEnd.value = parts[1] || "10:00";
+  }
+  btnDelete.classList.remove("hidden");
+  modal.classList.add("active");
+}
+
+function saveEvent() {
+  var title = evtTitle.value.trim();
+  if (!title) { alert("请输入事件标题"); return; }
+  var date = evtDate.value;
+  var allDay = evtAllDay.checked;
+  var time = allDay ? "" : (evtTimeStart.value + "-" + evtTimeEnd.value);
+
+  if (editingId) {
+    var evt = events.find(function(e) { return e.id === editingId; });
+    if (evt) {
+      evt.title = title;
+      evt.date = date;
+      evt.allDay = allDay;
+      evt.time = time;
+    }
+  } else {
+    events.push({ id: nextId++, date: date, title: title, allDay: allDay, time: time });
+  }
+  saveEvents();
+  closeModal();
+  render();
+}
+
+function deleteEvent(id) {
+  events = events.filter(function(e) { return e.id !== id; });
+  saveEvents();
+  render();
+  closeModal();
+}
+
+function closeModal() {
+  modal.classList.remove("active");
+  editingId = null;
+}
+
+// Modal event listeners
+evtAllDay.addEventListener("change", function() {
+  timeRow.style.display = evtAllDay.checked ? "none" : "flex";
+});
+
+btnSave.addEventListener("click", saveEvent);
+btnCancel.addEventListener("click", closeModal);
+btnDelete.addEventListener("click", function() {
+  if (editingId && confirm("确定删除这个事件吗？")) { deleteEvent(editingId); }
+});
+
+modal.addEventListener("click", function(e) {
+  if (e.target === modal) closeModal();
+});
+
+document.getElementById("addBtn").addEventListener("click", function() { openAddModal(""); });
 document.getElementById("prevBtn").addEventListener("click", function() {
   if (currentMonth === 1) { currentMonth = 12; currentYear--; }
   else { currentMonth--; }
   render();
 });
-
 document.getElementById("nextBtn").addEventListener("click", function() {
   if (currentMonth === 12) { currentMonth = 1; currentYear++; }
   else { currentMonth++; }
   render();
+});
+
+// Reset to defaults
+document.addEventListener("keydown", function(e) {
+  if (e.ctrlKey && e.shiftKey && e.key === "R") {
+    if (confirm("恢复默认事件？（将丢失所有自定义修改）")) {
+      events = defaultEvents;
+      saveEvents();
+      render();
+    }
+  }
 });
 
 render();
