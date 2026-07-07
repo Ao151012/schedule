@@ -6,6 +6,45 @@
 <title>2026年7月 日程表</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cell-min-height: 80px;
+    --event-font-size: 10px;
+    --cell-padding: 3px;
+    --cell-gap: 2px;
+    --event-padding: 2px 4px;
+    --header-padding: 10px 8px;
+    --header-title-size: 16px;
+    --header-btn-size: 30px;
+    --day-num-size: 11px;
+  }
+
+  @media (min-width: 480px) {
+    :root {
+      --cell-min-height: 90px;
+      --event-font-size: 11px;
+      --cell-padding: 4px;
+      --cell-gap: 2px;
+      --event-padding: 3px 5px;
+      --header-padding: 12px 12px;
+      --header-title-size: 17px;
+      --header-btn-size: 32px;
+      --day-num-size: 12px;
+    }
+  }
+
+  @media (min-width: 641px) {
+    :root {
+      --cell-min-height: 100px;
+      --event-font-size: 11px;
+      --cell-padding: 6px;
+      --cell-gap: 3px;
+      --event-padding: 3px 6px;
+      --header-padding: 20px 16px;
+      --header-title-size: 22px;
+      --header-btn-size: 36px;
+      --day-num-size: 13px;
+    }
+  }
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -13,6 +52,10 @@
     color: #1a1a1a;
     min-height: 100vh;
     padding: 0;
+  }
+
+  @media (min-width: 641px) {
+    body { padding: 24px 16px; display: flex; justify-content: center; }
   }
 
   .calendar-container {
@@ -23,10 +66,11 @@
     overflow: hidden;
     margin: 0 auto;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   @media (min-width: 641px) {
-    body { padding: 24px 16px; display: flex; justify-content: center; }
     .calendar-container { border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-height: auto; }
   }
 
@@ -34,23 +78,26 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 12px;
+    padding: var(--header-padding);
     border-bottom: 1px solid #eee;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 6px;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 10;
   }
 
   .calendar-header h1 {
-    font-size: 18px;
+    font-size: var(--header-title-size);
     font-weight: 600;
     white-space: nowrap;
-    order: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .calendar-header .nav-btns { display: flex; gap: 4px; order: 0; }
+  .calendar-header .nav-btns { display: flex; gap: 4px; flex-shrink: 0; }
 
   .calendar-header button {
-    height: 34px;
     border: 1px solid #ddd;
     border-radius: 6px;
     background: #fff;
@@ -62,39 +109,46 @@
     transition: background 0.15s;
   }
 
-  .calendar-header .nav-btns button { width: 34px; font-size: 14px; }
+  .calendar-header .nav-btns button {
+    width: var(--header-btn-size);
+    height: var(--header-btn-size);
+    font-size: calc(var(--header-btn-size) * 0.45);
+  }
 
   .add-btn {
+    height: var(--header-btn-size);
     padding: 0 10px;
-    font-size: 13px;
+    font-size: calc(var(--header-btn-size) * 0.38);
     color: #1a56db !important;
     border-color: #1a56db !important;
     font-weight: 500;
     white-space: nowrap;
-    order: 2;
+    flex-shrink: 0;
   }
 
   .calendar-header button:hover { background: #f0f0f0; }
   .add-btn:hover { background: #e8f0fe !important; }
 
-  @media (max-width: 400px) {
-    .calendar-header h1 { font-size: 16px; }
-    .add-btn { font-size: 12px; padding: 0 8px; height: 30px; }
-    .calendar-header .nav-btns button { width: 30px; height: 30px; font-size: 13px; }
-  }
-
   .weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     border-bottom: 1px solid #eee;
+    position: sticky;
+    top: calc(var(--header-btn-size) + var(--header-padding) * 2);
+    background: #fff;
+    z-index: 9;
   }
 
   .weekdays div {
     text-align: center;
     padding: 8px 2px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     color: #888;
+  }
+
+  @media (min-width: 641px) {
+    .weekdays div { font-size: 13px; padding: 10px 4px; }
   }
 
   .weekdays div:first-child, .weekdays div:last-child { color: #c44; }
@@ -102,26 +156,18 @@
   .days-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-auto-rows: minmax(72px, auto);
-  }
-
-  @media (min-width: 641px) {
-    .days-grid { grid-auto-rows: minmax(100px, auto); }
+    grid-auto-rows: minmax(var(--cell-min-height), auto);
   }
 
   .day-cell {
     border-right: 1px solid #f0f0f0;
     border-bottom: 1px solid #f0f0f0;
-    padding: 4px;
+    padding: var(--cell-padding);
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--cell-gap);
     overflow: hidden;
-  }
-
-  @media (min-width: 641px) {
-    .day-cell { padding: 6px; gap: 3px; }
   }
 
   .day-cell:nth-child(7n) { border-right: none; }
@@ -131,7 +177,7 @@
   .day-cell.drag-over { background: #e8f0fe !important; outline: 2px dashed #1a56db; }
 
   .day-num {
-    font-size: 12px;
+    font-size: var(--day-num-size);
     font-weight: 500;
     color: #333;
     margin-bottom: 1px;
@@ -161,21 +207,19 @@
   }
 
   .event {
-    font-size: 9px;
-    line-height: 1.3;
-    padding: 2px 4px;
+    font-size: var(--event-font-size);
+    line-height: 1.35;
+    padding: var(--event-padding);
     border-radius: 3px;
     cursor: pointer;
     position: relative;
     transition: box-shadow 0.15s;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    word-break: break-all;
     flex-shrink: 0;
   }
 
   @media (min-width: 641px) {
-    .event { font-size: 11px; padding: 3px 6px; border-radius: 4px; }
+    .event { border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; word-break: normal; }
   }
 
   .event:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
@@ -192,28 +236,31 @@
     border-left: 2px solid #c62828;
   }
 
-  .event.timed::before { content: '\25cf  '; font-size: 7px; vertical-align: middle; }
-
   @media (min-width: 641px) {
     .event.all-day, .event.timed { border-left-width: 3px; }
-    .event.timed::before { font-size: 8px; }
   }
+
+  .event.timed::before { content: '\25cf  '; font-size: 7px; vertical-align: middle; }
+  @media (min-width: 641px) { .event.timed::before { font-size: 8px; } }
 
   .event .delete-icon {
     position: absolute;
-    right: 2px;
-    top: 50%;
-    transform: translateY(-50%);
+    right: 1px;
+    top: 1px;
     width: 14px;
     height: 14px;
     line-height: 12px;
     text-align: center;
     border-radius: 50%;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.25);
     color: #fff;
     font-size: 9px;
     display: none;
     cursor: pointer;
+  }
+
+  @media (min-width: 641px) {
+    .event .delete-icon { right: 4px; top: 50%; transform: translateY(-50%); }
   }
 
   .event:hover .delete-icon { display: block; }
@@ -266,10 +313,10 @@
 
   .modal {
     background: #fff;
-    border-radius: 14px 14px 0 0;
+    border-radius: 16px 16px 0 0;
     padding: 20px 16px;
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
     max-height: 85vh;
     overflow-y: auto;
     box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
@@ -383,12 +430,8 @@ var defaultEvents = [
 
 var events = [];
 var stored = localStorage.getItem("schedule_events");
-if (stored) {
-  events = JSON.parse(stored);
-} else {
-  events = defaultEvents;
-  localStorage.setItem("schedule_events", JSON.stringify(events));
-}
+if (stored) { events = JSON.parse(stored); }
+else { events = defaultEvents; localStorage.setItem("schedule_events", JSON.stringify(events)); }
 
 var nextId = events.length > 0 ? Math.max.apply(null, events.map(function(e) { return e.id; })) + 1 : 1;
 
@@ -397,16 +440,12 @@ function saveEvents() { localStorage.setItem("schedule_events", JSON.stringify(e
 var eventMap = {};
 function buildMap() {
   eventMap = {};
-  events.forEach(function(e) {
-    if (!eventMap[e.date]) eventMap[e.date] = [];
-    eventMap[e.date].push(e);
-  });
+  events.forEach(function(e) { if (!eventMap[e.date]) eventMap[e.date] = []; eventMap[e.date].push(e); });
 }
 
 var currentYear = 2026, currentMonth = 7;
 var monthTitle = document.getElementById("monthTitle");
 var daysGrid = document.getElementById("daysGrid");
-
 var modal = document.getElementById("modal");
 var modalTitle = document.getElementById("modalTitle");
 var evtTitle = document.getElementById("evtTitle");
@@ -446,12 +485,10 @@ function render() {
     dateStr = y + "-" + pad2(m) + "-" + pad2(d);
     appendDay(d, dateStr, true);
   }
-
   for (d = 1; d <= daysInMonth; d++) {
     dateStr = currentYear + "-" + pad2(currentMonth) + "-" + pad2(d);
     appendDay(d, dateStr, false);
   }
-
   var totalCells = startDayOfWeek - 1 + daysInMonth;
   var remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
   var nextM = currentMonth === 12 ? 1 : currentMonth + 1;
@@ -468,7 +505,6 @@ function appendDay(dayNum, dateStr, isOtherMonth) {
   if (isOtherMonth) cell.classList.add("other-month");
   if (dateStr === todayStr()) cell.classList.add("today");
   cell.setAttribute("data-date", dateStr);
-
   cell.addEventListener("dragover", function(ev) { ev.preventDefault(); cell.classList.add("drag-over"); });
   cell.addEventListener("dragleave", function() { cell.classList.remove("drag-over"); });
   cell.addEventListener("drop", function(ev) {
@@ -485,9 +521,7 @@ function appendDay(dayNum, dateStr, isOtherMonth) {
     dot.className = "today-dot";
     dot.textContent = dayNum;
     numEl.appendChild(dot);
-  } else {
-    numEl.textContent = dayNum;
-  }
+  } else { numEl.textContent = dayNum; }
   cell.appendChild(numEl);
 
   var dayEvents = eventMap[dateStr] || [];
@@ -496,11 +530,9 @@ function appendDay(dayNum, dateStr, isOtherMonth) {
     if (ev.allDay) {
       el.className = "event all-day";
       el.textContent = ev.title;
-      el.title = ev.title + " (全天) - 点击编辑";
     } else {
       el.className = "event timed";
       el.textContent = ev.title + " " + ev.time;
-      el.title = ev.title + " " + ev.time + " - 点击编辑";
     }
     el.setAttribute("data-id", ev.id);
     el.draggable = true;
@@ -557,23 +589,18 @@ function saveEvent() {
   var date = evtDate.value;
   var allDay = evtAllDay.checked;
   var time = allDay ? "" : (evtTimeStart.value + "-" + evtTimeEnd.value);
-
   if (editingId) {
     var evt = events.find(function(e) { return e.id === editingId; });
     if (evt) { evt.title = title; evt.date = date; evt.allDay = allDay; evt.time = time; }
   } else {
     events.push({ id: nextId++, date: date, title: title, allDay: allDay, time: time });
   }
-  saveEvents();
-  closeModal();
-  render();
+  saveEvents(); closeModal(); render();
 }
 
 function deleteEvent(id) {
   events = events.filter(function(e) { return e.id !== id; });
-  saveEvents();
-  render();
-  closeModal();
+  saveEvents(); render(); closeModal();
 }
 
 function closeModal() { modal.classList.remove("active"); editingId = null; }
