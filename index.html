@@ -75,11 +75,11 @@ button:hover{background:#f0f0f0}
 .hint{padding:8px 12px;font-size:10px;color:#999;border-top:1px solid #eee;line-height:1.5}
 
 /* Modal */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;justify-content:center;align-items:flex-end}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;justify-content:center;align-items:flex-end;padding:10px 0}
 @media(min-width:641px){.modal-overlay{align-items:center}}
 .modal-overlay.active{display:flex}
-.modal{background:#fff;border-radius:16px 16px 0 0;padding:20px 16px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(0,0,0,.15)}
-@media(min-width:641px){.modal{border-radius:10px;padding:24px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2)}}
+.modal{background:#fff;border-radius:16px 16px 0 0;padding:20px 16px 16px;width:100%;max-width:420px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -4px 24px rgba(0,0,0,.15)}
+@media(min-width:641px){.modal{border-radius:10px;padding:24px 24px 20px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2)}}
 .modal h3{font-size:16px;margin-bottom:14px}
 .modal label{display:block;font-size:12px;color:#666;margin-bottom:3px}
 .modal input,.modal select{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:15px;margin-bottom:10px;font-family:inherit}
@@ -87,25 +87,39 @@ button:hover{background:#f0f0f0}
 .modal .checkbox-row input{width:auto;margin-bottom:0}
 .modal .time-row{display:flex;gap:8px}
 .modal .time-row input{flex:1;margin-bottom:0}
-.modal .btn-row{display:flex;gap:8px;margin-top:14px}
+.modal-body{overflow-y:auto;flex:1;margin-bottom:8px}
+.modal .btn-row{display:flex;gap:8px;margin-top:12px;flex-shrink:0;background:#fff;padding-top:8px;border-top:1px solid #eee}
 .modal .btn-row button{flex:1;padding:12px;border-radius:6px;font-size:15px;cursor:pointer;border:1px solid #ddd;background:#fff;font-family:inherit}
 .modal .btn-save{background:#1a56db;color:#fff;border-color:#1a56db}
 .modal .btn-delete{background:#c62828;color:#fff;border-color:#c62828}
 .modal .btn-delete.hidden{display:none}
+
+/* Title input with mic button */
+.title-input-row{display:flex;gap:6px;align-items:center}
+.title-input-row input{flex:1;margin-bottom:0}
+.voice-btn{width:40px;height:40px;border-radius:50%;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.voice-btn:hover{background:#f0f0f0;border-color:#1a56db}
+.voice-btn.listening{background:#d93025;color:#fff;border-color:#d93025;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,48,37,.4)}50%{box-shadow:0 0 0 8px rgba(217,48,37,0)}}
+.voice-btn.unsupported{opacity:.4;cursor:not-allowed}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
 </style>
 </head>
 <body>
 <div class="modal-overlay" id="modal">
 <div class="modal">
 <h3 id="modalTitle">新增事件</h3>
-<label>标题</label><input type="text" id="evtTitle" placeholder="例如：开会">
+<div class="modal-body">
+<label>标题</label><div class="title-input-row"><input type="text" id="evtTitle" placeholder="例如：开会"><button type="button" id="voiceBtn" class="voice-btn" title="语音输入">🎤</button></div>
 <label>日期</label><input type="date" id="evtDate">
 <div class="checkbox-row"><input type="checkbox" id="evtAllDay"><label for="evtAllDay" style="margin:0">全天事件</label></div>
 <div class="time-row" id="timeRow"><input type="time" id="evtTimeStart" value="09:00"><input type="time" id="evtTimeEnd" value="10:00"></div>
+</div>
 <div class="btn-row">
 <button class="btn-delete hidden" id="btnDelete">删除</button>
 <button id="btnCancel">取消</button>
-<button class="btn-save" id="btnSave">保存</button>
+<button class="btn-save" id="btnSave">确认</button>
 </div>
 </div></div>
 
@@ -150,7 +164,8 @@ var evtTitle=document.getElementById("evtTitle"),evtDate=document.getElementById
 var evtAllDay=document.getElementById("evtAllDay"),timeRow=document.getElementById("timeRow");
 var evtTimeStart=document.getElementById("evtTimeStart"),evtTimeEnd=document.getElementById("evtTimeEnd");
 var btnDelete=document.getElementById("btnDelete"),btnSave=document.getElementById("btnSave");
-var btnCancel=document.getElementById("btnCancel"),editingId=null;
+var btnCancel=document.getElementById("btnCancel"),voiceBtn=document.getElementById("voiceBtn"),toastEl=document.getElementById("toast"),editingId=null;
+function showToast(msg){toastEl.textContent=msg;toastEl.classList.add("show");setTimeout(function(){toastEl.classList.remove("show")},2000)}
 function todayStr(){var d=new Date();function p(n){return n<10?"0"+n:n};return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())}
 function render(){
 buildMap();monthTitle.textContent=currentYear+"年 "+currentMonth+"月";daysGrid.innerHTML="";
@@ -180,9 +195,9 @@ el.addEventListener("click",function(e){e.stopPropagation();openEditModal(ev)});
 var di=document.createElement("span");di.className="delete-icon";di.textContent="x";
 di.addEventListener("click",function(e2){e2.stopPropagation();deleteEvent(ev.id)});el.appendChild(di);c.appendChild(el)});
 daysGrid.appendChild(c)}
-function openAddModal(ds){editingId=null;modalTitle.textContent="新增事件";evtTitle.value="";evtDate.value=ds||todayStr();evtAllDay.checked=false;evtTimeStart.value="09:00";evtTimeEnd.value="10:00";timeRow.style.display="flex";btnDelete.classList.add("hidden");modal.classList.add("active")}
-function openEditModal(ev){editingId=ev.id;modalTitle.textContent="编辑事件";evtTitle.value=ev.title;evtDate.value=ev.date;evtAllDay.checked=ev.allDay;if(ev.allDay){timeRow.style.display="none";evtTimeStart.value="09:00";evtTimeEnd.value="10:00"}else{timeRow.style.display="flex";var p=ev.time?ev.time.split("-"):["09:00","10:00"];evtTimeStart.value=p[0]||"09:00";evtTimeEnd.value=p[1]||"10:00"}btnDelete.classList.remove("hidden");modal.classList.add("active")}
-function saveEvent(){var t=evtTitle.value.trim();if(!t){alert("请输入事件标题");return}var dt=evtDate.value,ad=evtAllDay.checked,tm=ad?"":(evtTimeStart.value+"-"+evtTimeEnd.value);if(editingId){var ev=events.find(function(e){return e.id===editingId});if(ev){ev.title=t;ev.date=dt;ev.allDay=ad;ev.time=tm}}else{events.push({id:nextId++,date:dt,title:t,allDay:ad,time:tm})}saveEvents();closeModal();render()}
+function openAddModal(ds){editingId=null;modalTitle.textContent="新增事件";btnSave.textContent="确认";evtTitle.value="";evtDate.value=ds||todayStr();evtAllDay.checked=false;evtTimeStart.value="09:00";evtTimeEnd.value="10:00";timeRow.style.display="flex";btnDelete.classList.add("hidden");modal.classList.add("active")}
+function openEditModal(ev){editingId=ev.id;modalTitle.textContent="编辑事件";btnSave.textContent="确认修改";evtTitle.value=ev.title;evtDate.value=ev.date;evtAllDay.checked=ev.allDay;if(ev.allDay){timeRow.style.display="none";evtTimeStart.value="09:00";evtTimeEnd.value="10:00"}else{timeRow.style.display="flex";var p=ev.time?ev.time.split("-"):["09:00","10:00"];evtTimeStart.value=p[0]||"09:00";evtTimeEnd.value=p[1]||"10:00"}btnDelete.classList.remove("hidden");modal.classList.add("active")}
+function saveEvent(){var t=evtTitle.value.trim();if(!t){alert("请输入事件标题");return}var dt=evtDate.value,ad=evtAllDay.checked,tm=ad?"":(evtTimeStart.value+"-"+evtTimeEnd.value);if(editingId){var ev=events.find(function(e){return e.id===editingId});if(ev){ev.title=t;ev.date=dt;ev.allDay=ad;ev.time=tm}}else{events.push({id:nextId++,date:dt,title:t,allDay:ad,time:tm})}saveEvents();closeModal();render();showToast(editingId?"事件已更新":"事件已添加")}
 function deleteEvent(id){events=events.filter(function(e){return e.id!==id});saveEvents();render();closeModal()}
 function closeModal(){modal.classList.remove("active");editingId=null}
 evtAllDay.addEventListener("change",function(){timeRow.style.display=evtAllDay.checked?"none":"flex"});
@@ -193,7 +208,65 @@ document.getElementById("addBtn").addEventListener("click",function(){openAddMod
 document.getElementById("prevBtn").addEventListener("click",function(){if(currentMonth===1){currentMonth=12;currentYear--}else{currentMonth--}render()});
 document.getElementById("nextBtn").addEventListener("click",function(){if(currentMonth===12){currentMonth=1;currentYear++}else{currentMonth++}render()});
 document.addEventListener("keydown",function(e){if(e.ctrlKey&&e.shiftKey&&e.key==="R"){if(confirm("恢复默认事件？")){events=defaultEvents;saveEvents();render()}}});
+var SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+var recognition=null,isListening=false;
+if(SpeechRecognition){
+recognition=new SpeechRecognition();
+recognition.lang="zh-CN";
+recognition.interimResults=false;
+recognition.continuous=false;
+function parseVoiceDate(text){
+var d=new Date();var dateStr="";var timeStart="";var timeEnd="";var title=text;
+// 日期解析
+var r=/明天/.exec(title);if(r){d.setDate(d.getDate()+1);title=title.replace("明天","")}
+r=/后天/.exec(title);if(r){d.setDate(d.getDate()+2);title=title.replace("后天","")}
+r=/大后天/.exec(title);if(r){d.setDate(d.getDate()+3);title=title.replace("大后天","")}
+r=/今天/.exec(title);if(r){title=title.replace("今天","")}
+r=/下周(一|二|三|四|五|六|日|天)/.exec(title);if(r){var wd={"一":1,"二":2,"三":3,"四":4,"五":5,"六":6,"日":0,"天":0};var tw=wd[r[1]];var cd=d.getDay();var dd=(7-cd+tw)%7||7;d.setDate(d.getDate()+dd);title=title.replace(r[0],"")}
+r=/下星期(一|二|三|四|五|六|日|天)/.exec(title);if(r){var wd2={"一":1,"二":2,"三":3,"四":4,"五":5,"六":6,"日":0,"天":0};var tw2=wd2[r[1]];var cd2=d.getDay();var dd2=(7-cd2+tw2)%7||7;d.setDate(d.getDate()+dd2);title=title.replace(r[0],"")}
+r=/周(一|二|三|四|五|六|日|天)/.exec(title);if(r){var wd3={"一":1,"二":2,"三":3,"四":4,"五":5,"六":6,"日":0,"天":0};var tw3=wd3[r[1]];var cd3=d.getDay();var dd3=(7-cd3+tw3)%7;if(dd3===0)dd3=7;d.setDate(d.getDate()+dd3);title=title.replace(r[0],"")}
+r=/(\d+)月(\d+)[号日]/.exec(title);if(r){d.setMonth(parseInt(r[1])-1);d.setDate(parseInt(r[2]));title=title.replace(r[0],"")}
+function p(n){return n<10?"0"+n:n}
+dateStr=d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+// 时间解析
+r=/(上午|下午|晚上|中午)?\s*(\d{1,2})点(\s*(半|(\d{1,2})分))?\s*(到|-|至)\s*(上午|下午|晚上|中午)?\s*(\d{1,2})点(\s*(半|(\d{1,2})分))?/.exec(title);
+if(r){
+var h1=parseInt(r[2]),h2=parseInt(r[8]);var ap1=r[1]||"",ap2=r[7]||"";
+function to24(h,ap){if(ap==="下午"||ap==="晚上"){if(h<12)h+=12}else if(ap==="中午"&&h<12)h+=12;else if(ap==="上午"&&h===12)h=0;return h}
+h1=to24(h1,ap1||(h2>h1&&!ap2?"":(h1>=8?"上午":"下午")));h2=to24(h2,ap2||(h2<h1?"下午":""));
+timeStart=p(h1)+":"+p(r[5]?parseInt(r[5]):0);timeEnd=p(h2)+":"+p(r[11]?parseInt(r[11]):0);
+title=title.replace(r[0],"");
+}else{
+r=/(上午|下午|晚上|中午)?\s*(\d{1,2})点(\s*(半|(\d{1,2})分))?/.exec(title);
+if(r){var h=parseInt(r[2]);var ap=r[1]||"";h=ap==="下午"||ap==="晚上"?h+12:ap==="中午"&&h<12?h+12:ap==="上午"&&h===12?0:h;timeStart=p(h)+":"+p(r[5]?parseInt(r[5]):0);title=title.replace(r[0],"")}
+}
+title=title.replace(/^\s+|\s+$/g,"").replace(/[,，。、\s]+$/,"");
+if(!title)title="语音输入";
+return{date:dateStr,timeStart:timeStart,timeEnd:timeEnd,title:title}
+}
+recognition.onresult=function(e){
+var raw=e.results[0][0].transcript;
+var parsed=parseVoiceDate(raw);
+evtTitle.value=parsed.title;
+evtDate.value=parsed.date;
+if(parsed.timeStart){
+evtAllDay.checked=false;timeRow.style.display="flex";
+evtTimeStart.value=parsed.timeStart;
+evtTimeEnd.value=parsed.timeEnd||parsed.timeStart;
+}else{
+evtAllDay.checked=false;timeRow.style.display="flex";
+evtTimeStart.value="09:00";evtTimeEnd.value="10:00";
+}
+stopListening();showToast("语音识别完成："+raw.substring(0,20)+"...");
+};
+recognition.onerror=function(){stopListening();showToast("语音识别失败，请重试")};
+recognition.onend=function(){stopListening()};
+voiceBtn.addEventListener("click",function(){if(isListening){stopListening()}else{startListening()}})
+}else{voiceBtn.classList.add("unsupported");voiceBtn.title="浏览器不支持语音识别"}
+function startListening(){isListening=true;voiceBtn.classList.add("listening");voiceBtn.textContent="🔴";recognition.start()}
+function stopListening(){isListening=false;voiceBtn.classList.remove("listening");voiceBtn.textContent="🎤";try{recognition.stop()}catch(e){}}
 render();
 </script>
+<div class="toast" id="toast"></div>
 </body>
 </html>

@@ -1,2 +1,5 @@
-# schedule
-2026 Calendar
+# 2026年7月 日程表
+
+个人日程管理页面，支持事件增删改、拖拽移动、语音输入。
+
+在线地址：https://ao151012.github.io/schedule
