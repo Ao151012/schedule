@@ -324,7 +324,7 @@ var defaultEvents=[
 {id:182,date:"2026-12-31",title:"CPAѧϰ",allDay:false,time:"07:00-09:00"}
 ];
 var events=[],stored=localStorage.getItem("schedule_events");
-if(stored){events=JSON.parse(stored)}else{events=defaultEvents;localStorage.setItem("schedule_events",JSON.stringify(events))}
+if(stored){events=JSON.parse(stored);var defIds=defaultEvents.map(function(e){return e.id});events.forEach(function(e){if(defIds.indexOf(e.id)===-1){defaultEvents.push(e)}});events=defaultEvents;localStorage.setItem("schedule_events",JSON.stringify(events))}else{events=defaultEvents;localStorage.setItem("schedule_events",JSON.stringify(events))}
 var nextId=events.length>0?Math.max.apply(null,events.map(function(e){return e.id}))+1:1;
 function saveEvents(){localStorage.setItem("schedule_events",JSON.stringify(events))}
 var eventMap={};
