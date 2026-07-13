@@ -334,7 +334,8 @@ var defaultEvents=[
 {id:193,date:"2026-08-17",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
 {id:194,date:"2026-08-24",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
 {id:195,date:"2026-08-31",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
-{id:196,date:"2026-07-14",title:"普拉提",allDay:false,time:"18:00-19:00"}
+{id:196,date:"2026-07-14",title:"普拉提",allDay:false,time:"18:00-19:00"},
+{id:197,date:"2026-07-15",title:"发开题反馈文件给付老师",allDay:true,time:""}
 ];
 var events=[],stored=localStorage.getItem("schedule_events");
 if(stored){events=JSON.parse(stored);var defIds=defaultEvents.map(function(e){return e.id});events.forEach(function(e){if(defIds.indexOf(e.id)===-1){defaultEvents.push(e)}});events=defaultEvents;}else{events=defaultEvents;localStorage.setItem("schedule_events",JSON.stringify(events))}
