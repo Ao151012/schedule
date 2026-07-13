@@ -326,7 +326,16 @@ var defaultEvents=[
 {id:184,date:"2026-07-16",title:"西安出差",allDay:true,time:""},
 {id:185,date:"2026-07-17",title:"西安出差",allDay:true,time:""},
 {id:186,date:"2026-07-18",title:"西安出差",allDay:true,time:""},
-{id:187,date:"2026-07-19",title:"西安出差",allDay:true,time:""}
+{id:187,date:"2026-07-19",title:"西安出差",allDay:true,time:""},
+{id:188,date:"2026-07-13",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
+{id:189,date:"2026-07-20",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
+{id:190,date:"2026-07-27",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
+{id:191,date:"2026-08-03",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
+{id:192,date:"2026-08-10",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
+{id:193,date:"2026-08-17",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
+{id:194,date:"2026-08-24",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
+{id:195,date:"2026-08-31",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
+{id:196,date:"2026-07-14",title:"普拉提",allDay:false,time:"18:00-19:00"}
 ];
 var events=[],stored=localStorage.getItem("schedule_events");
 if(stored){events=JSON.parse(stored);var defIds=defaultEvents.map(function(e){return e.id});events.forEach(function(e){if(defIds.indexOf(e.id)===-1){defaultEvents.push(e)}});events=defaultEvents;}else{events=defaultEvents;localStorage.setItem("schedule_events",JSON.stringify(events))}
