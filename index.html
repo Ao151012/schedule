@@ -67,11 +67,18 @@ button:hover{background:#f0f4f8}
 .event:hover .delete-icon{display:block}.event .delete-icon:hover{background:rgba(200,0,0,.7)}
 
 /* Legend & Hint */
+/* Category colors */
+.event.cat-sport{background:#fff9db;color:#2d3436;border-left:2px solid #f0c929}
+.event.cat-work{background:#d4efdf;color:#2d3436;border-left:2px solid #27ae60}
+.event.cat-study{background:#fce4ec;color:#2d3436;border-left:2px solid #e17055}
 .legend{display:flex;gap:12px;padding:8px 12px;border-top:1px solid #e8edf2;font-size:11px;color:#636e72}
 .legend-item{display:flex;align-items:center;gap:4px}
 .legend-swatch{width:10px;height:10px;border-radius:2px}
 .legend-swatch.all-day{background:#d4efdf;border-left:2px solid #27ae60}
 .legend-swatch.timed{background:#fce4ec;border-left:2px solid #e17055}
+.legend-swatch.cat-study{background:#fce4ec;border-left:2px solid #e17055}
+.legend-swatch.cat-sport{background:#fff9db;border-left:2px solid #f0c929}
+.legend-swatch.cat-work{background:#d4efdf;border-left:2px solid #27ae60}
 .hint{padding:8px 12px;font-size:10px;color:#b2bec3;border-top:1px solid #e8edf2;line-height:1.5}
 
 /* Modal */
@@ -132,8 +139,9 @@ button:hover{background:#f0f4f8}
 <div class="weekdays"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
 <div class="days-grid" id="daysGrid"></div>
 <div class="legend">
-<div class="legend-item"><span class="legend-swatch all-day"></span> 全天</div>
-<div class="legend-item"><span class="legend-swatch timed"></span> 定时</div>
+<div class="legend-item"><span class="legend-swatch cat-study"></span> 学习</div>
+<div class="legend-item"><span class="legend-swatch cat-sport"></span> 运动</div>
+<div class="legend-item"><span class="legend-swatch cat-work"></span> 工作</div>
 </div>
 <div class="hint">点击事件可编辑 · 悬停右侧 × 可删除 · 点击"+ 新增"添加事件</div>
 </div>
@@ -340,6 +348,7 @@ var defaultEvents=[
 var events=[],stored=localStorage.getItem("schedule_events");
 if(stored){events=JSON.parse(stored);var defIds=defaultEvents.map(function(e){return e.id});events.forEach(function(e){if(defIds.indexOf(e.id)===-1){defaultEvents.push(e)}});events=defaultEvents;}else{events=defaultEvents;localStorage.setItem("schedule_events",JSON.stringify(events))}
 var nextId=events.length>0?Math.max.apply(null,events.map(function(e){return e.id}))+1:1;
+function getCategoryClass(t){var study=["CPA","西班牙语","西语","注会","作业"];var sport=["普拉提"];var work=["出差","反馈","付老师","述职","开题","答辩","香港","西安"];for(var i=0;i<study.length;i++){if(t.indexOf(study[i])>=0)return"cat-study"}for(var i=0;i<sport.length;i++){if(t.indexOf(sport[i])>=0)return"cat-sport"}for(var i=0;i<work.length;i++){if(t.indexOf(work[i])>=0)return"cat-work"}return"cat-study"}
 function saveEvents(){localStorage.setItem("schedule_events",JSON.stringify(events))}
 var eventMap={};
 function buildMap(){eventMap={};events.forEach(function(e){if(!eventMap[e.date])eventMap[e.date]=[];eventMap[e.date].push(e)})}
@@ -374,7 +383,7 @@ var ne=document.createElement("div");ne.className="day-num";
 if(ds===todayStr()){var dot=document.createElement("span");dot.className="today-dot";dot.textContent=dn;ne.appendChild(dot)}else{ne.textContent=dn}
 c.appendChild(ne);
 var de=eventMap[ds]||[];de.forEach(function(ev){var el=document.createElement("div");
-if(ev.allDay){el.className="event all-day";el.textContent=ev.title}else{el.className="event timed";el.textContent=ev.title+" "+ev.time}
+var cat=getCategoryClass(ev.title);if(ev.allDay){el.className="event all-day "+cat;el.textContent=ev.title}else{el.className="event timed "+cat;el.textContent=ev.title+" "+ev.time}
 el.setAttribute("data-id",ev.id);el.draggable=true;
 el.addEventListener("dragstart",function(ev2){ev2.dataTransfer.setData("text/plain",ev.id.toString())});
 el.addEventListener("click",function(e){e.stopPropagation();openEditModal(ev)});
