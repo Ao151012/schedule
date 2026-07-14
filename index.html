@@ -67,7 +67,6 @@ button:hover{background:#f0f4f8}
 .event:hover .delete-icon{display:block}.event .delete-icon:hover{background:rgba(200,0,0,.7)}
 
 /* Legend & Hint */
-/* Category colors */
 .event.cat-sport{background:#fff9db;color:#2d3436;border-left:2px solid #f0c929}
 .event.cat-work{background:#d4efdf;color:#2d3436;border-left:2px solid #27ae60}
 .event.cat-study{background:#fce4ec;color:#2d3436;border-left:2px solid #e17055}
@@ -343,7 +342,8 @@ var defaultEvents=[
 {id:194,date:"2026-08-24",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
 {id:195,date:"2026-08-31",title:"西班牙语课",allDay:false,time:"19:00-20:30"},
 {id:196,date:"2026-07-14",title:"普拉提",allDay:false,time:"18:00-19:00"},
-{id:197,date:"2026-07-15",title:"发开题反馈文件给付老师",allDay:true,time:""}
+{id:197,date:"2026-07-15",title:"发开题反馈文件给付老师",allDay:true,time:""},
+{id:198,date:"2026-07-14",title:"完成西班牙语作业",allDay:true,time:""}
 ];
 var events=[],stored=localStorage.getItem("schedule_events");
 if(stored){events=JSON.parse(stored);var defIds=defaultEvents.map(function(e){return e.id});events.forEach(function(e){if(defIds.indexOf(e.id)===-1){defaultEvents.push(e)}});events=defaultEvents;}else{events=defaultEvents;localStorage.setItem("schedule_events",JSON.stringify(events))}
