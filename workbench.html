@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Personal Workbench</title>
+<title>个人工作台</title>
 <style>
 :root{--p:#4f46e5;--ph:#4338ca;--bg:#f3f4f6;--s:#fff;--b:#e5e7eb;--t:#111827;--t2:#6b7280;--t3:#9ca3af;--d:#ef4444;--gn:#10b981;--am:#f59e0b;--r:10px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -106,17 +106,17 @@ textarea:focus{outline:none;border-color:var(--p)}
 .setup p{font-size:13px;color:var(--t2);margin-bottom:14px}
 .setup input{width:100%;padding:10px;border:1px solid var(--b);border-radius:6px;font-size:14px;font-family:monospace;margin-bottom:12px}
 .setup input:focus{outline:none;border-color:var(--p)}
-</style>
+.rbn{background:#fffbeb;border-bottom:1px solid #fcd34d;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:#92400e;cursor:pointer}.rbn.hidden{display:none}</style>
 </head>
 <body>
 <div class="app">
-<header><h2>Personal Workbench</h2><div class="hr"><button class="mic-btn" id="mic" title="Voice">🎤</button></div></header>
-<nav><button data-tab="plan" class="active">Week Plan</button><button data-tab="review">Review</button><button data-tab="stats">Stats</button></nav>
-<main id="main"></main>
+<header><h2>个人工作台</h2><div class="hr"><button class="mic-btn" id="mic" title="Voice">🎤</button></div></header>
+<nav><button data-tab="plan" class="active">周计划</button><button data-tab="review">每日回顾</button><button data-tab="stats">数据分析</button></nav>
+<div class="rbn hidden" id="rb" onclick="sw(\x27review\x27)">📝 今天还没有做回顾，点击前往</div><main id="main"></main>
 </div>
 <div class="mbg hidden" id="mbg"><div class="modal" id="mbody"></div></div>
 <div class="toast" id="toast"></div>
-<div class="setup-bg" id="setupBg"><div class="setup"><h2>API Setup</h2><p>Enter your DeepSeek API key:</p><input type="password" id="apiKeyInput" placeholder="sk-..."><button class="btn btn-p" onclick="saveKey()" style="width:100%;margin-top:4px">Save</button></div></div>
+<div class="setup-bg" id="setupBg"><div class="setup"><h2>API Setup</h2><p>Enter your DeepSeek API key:</p><input type="password" id="apiKeyInput" placeholder="sk-..."><button class="btn btn-p" onclick="saveKey()" style="width:100%;margin-top:4px">保存</button></div></div>
 <script>
 var CATS=[{id:"dev",label:"dev",color:"#3b82f6"},{id:"doc",label:"doc",color:"#8b5cf6"},{id:"meet",label:"meet",color:"#f59e0b"},{id:"comm",label:"comm",color:"#ec4899"},{id:"learn",label:"learn",color:"#10b981"},{id:"maint",label:"maint",color:"#f97316"},{id:"other",label:"other",color:"#6b7280"}];
 var CATM={};CATS.forEach(function(c){CATM[c.id]=c});
@@ -129,16 +129,16 @@ function f(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+
 function getMon(d){var n=new Date(d),day=n.getDay();n.setDate(n.getDate()-(day===0?6:day-1));n.setHours(0,0,0,0);return n}
 function gd(m){var r=[];for(var i=0;i<7;i++){var d=new Date(m);d.setDate(d.getDate()+i);r.push(d)}return r}
 function sd(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
-function eh(s){var d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
+function chk(){var td=f(new Date());var r=lr2(td);var has=r.tasks.length>0||r.reflection;document.getElementById(\x27rb\x27).classList.toggle(\x27hidden\x27,has)}function eh(s){var d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
 
 function loadPlans(){var d=DB.getItem("wb_plans");plans=d?JSON.parse(d):[];return plans}
 function savePlans(){DB.setItem("wb_plans",JSON.stringify(plans))}
-function loadReview(dt){var d=DB.getItem("wb_reviews");var rv=d?JSON.parse(d):{};return rv[dt]||{date:dt,reflection:"",tasks:[]}}
-function saveReview(dt,data){var d=DB.getItem("wb_reviews");var rv=d?JSON.parse(d):{};rv[dt]=data;DB.setItem("wb_reviews",JSON.stringify(rv))}
+function load每日回顾(dt){var d=DB.getItem("wb_reviews");var rv=d?JSON.parse(d):{};return rv[dt]||{date:dt,reflection:"",tasks:[]}}
+function save每日回顾(dt,data){var d=DB.getItem("wb_reviews");var rv=d?JSON.parse(d):{};rv[dt]=data;DB.setItem("wb_reviews",JSON.stringify(rv))}
 function getHistory(lim){var d=DB.getItem("wb_reviews");var rv=d?JSON.parse(d):{};var ks=Object.keys(rv).sort().reverse().slice(0,lim||7);return ks.map(function(k){var r=rv[k];return{date:k,reflection:r.reflection,task_count:r.tasks.length,total_hours:r.tasks.reduce(function(s,t){return s+(t.hours||0)},0)}})}
 
 function dsApi(messages){
-  if(!API_KEY){toast("Please set API key first",true);return Promise.reject(new Error("No key"))}
+  if(!API_KEY){toast("请先设置API密钥",true);return Promise.reject(new Error("未设置密钥"))}
   return fetch(DS_BASE+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+API_KEY},body:JSON.stringify({model:"deepseek-chat",messages:messages,temperature:0.1,max_tokens:300})})
   .then(function(r){if(!r.ok)return r.text().then(function(m){throw new Error(m)});return r.json()})
 }
@@ -148,23 +148,23 @@ function parseVoice(text){
   return dsApi([{role:"user",content:prompt}]).then(function(r){var raw=r.choices[0].message.content.trim();if(raw.startsWith("```")){raw=raw.split("\n").slice(1).join("\n");if(raw.endsWith("```"))raw=raw.slice(0,-3)}return JSON.parse(raw)});
 }
 
-function rp(){
+function rp(){chk();
   var m=document.getElementById("main");
-  m.innerHTML="<div class=empty>Loading...</div>";
+  m.innerHTML="<div class=empty>加载中...</div>";
   loadPlans();
   var dates=gd(ws),today=new Date();
   var we=new Date(ws);we.setDate(we.getDate()+6);
   var wl=(ws.getMonth()+1)+"/"+ws.getDate()+" - "+(we.getMonth()+1)+"/"+we.getDate();
   var isThisWeek=sd(ws,getMon(today));
   var h="<div class=wn><button onclick=cw(-1)>Back</button><span class=wnl>"+wl+"</span>";
-  if(!isThisWeek)h+="<button class=tb onclick=goW()>This Week</button>";
+  if(!isThisWeek)h+="<button class=tb onclick=goW()>本周</button>";
   h+="<button onclick=cw(1)>Next</button></div><div class=wg>";
   for(var i=0;i<7;i++){
-    var d=dates[i],key=f(d),isToday=sd(d,today);
+    var d=dates[i],key=f(d),is今天=sd(d,today);
     var dps=plans.filter(function(p){return p.date===key});
     var tbs=dps.filter(function(p){return p.type==="timeblock"}).sort(function(a,b){return (a.start_time||"").localeCompare(b.start_time||"")});
     var flx=dps.filter(function(p){return p.type!=="timeblock"});
-    h+="<div class=dc"+(isToday?" today":"")+">";
+    h+="<div class=dc"+(is今天?" today":"")+">";
     h+="<div class=dh>"+D[d.getDay()]+"</div><div class=dn>"+d.getDate()+"</div><div class=dt>";
     tbs.forEach(function(t){var c=CATM[t.category]||CATM["other"];h+="<div class="ti tb" style=border-left-color:"+c.color+"><div class="ck"+(t.done?" on":"")+"" onclick=tg('"+t.id+"')>OK</div><span class=tm>"+(t.start_time||"?")+"-"+(t.end_time||"?")+"</span><span class="tt"+(t.done?" on":"")+"">"+eh(t.title)+"</span><button class=tx onclick=dl('"+t.id+"')>x</button></div>"});
     flx.forEach(function(t){var c=CATM[t.category]||CATM["other"];h+="<div class=ti style=border-left-color:"+c.color+"><div class="ck"+(t.done?" on":"")+"" onclick=tg('"+t.id+"')>OK</div><span class="tt"+(t.done?" on":"")+"">"+eh(t.title)+"</span>";if(t.est_hours)h+="<span style=font-size:8px;color:var(--t3)>"+t.est_hours+"h</span>";if(t.deadline)h+="<span style=font-size:8px;color:var(--d)>dl:"+t.deadline.slice(5)+"</span>";h+="<button class=tx onclick=dl('"+t.id+"')>x</button></div>"});
@@ -175,16 +175,16 @@ function rp(){
 }
 
 function tg(id){var p=plans.find(function(x){return x.id===id});if(!p)return;p.done=p.done?0:1;savePlans();ra()}
-function dl(id){if(!confirm("Delete?"))return;plans=plans.filter(function(x){return x.id!==id});savePlans();ra()}
+function dl(id){if(!confirm("确认删除?"))return;plans=plans.filter(function(x){return x.id!==id});savePlans();ra()}
 
 function om(dk,pf){
   document.getElementById("mbg").classList.remove("hidden");
   var tb=pf&&pf.type==="timeblock";
   var b=document.getElementById("mbody");
-  b.innerHTML="<h3>Add Task - "+dk+"</h3>"+
+  b.innerHTML="<h3>添加任务 - "+dk+"</h3>"+
     "<div class=fd><label>Title</label><input id=mT value=""+(pf?eh(pf.title):"")+""></div>"+
-    "<div class=fd><label>Category</label><select id=mC>"+CATS.map(function(c){return "<option value="+c.id+(pf&&pf.category===c.id?" selected":"")+">"+c.label+"</option>"}).join("")+"</select></div>"+
-    "<div class=fd><label>Type</label><select id=mTP onchange=tgTP()><option value=timeblock"+(tb?" selected":"")+">Time Block</option><option value=flexible"+(!tb?" selected":"")+">Flexible</option></select></div>"+
+    "<div class=fd><label>分类分布</label><select id=mC>"+CATS.map(function(c){return "<option value="+c.id+(pf&&pf.category===c.id?" selected":"")+">"+c.label+"</option>"}).join("")+"</select></div>"+
+    "<div class=fd><label>Type</label><select id=mTP onchange=tgTP()><option value=timeblock"+(tb?" selected":"")+">时间块</option><option value=flexible"+(!tb?" selected":"")+">弹性任务</option></select></div>"+
     "<div id=mTB"+(tb?"":" style=display:none")+">"+
       "<div class=fd><label>Date</label><input type=date id=mDate value=""+(pf?pf.date||dk:dk)+""></div>"+
       "<div class=fdr><div class=fd><label>Start</label><input type=time id=mS value=""+(pf?pf.start_time||"09:00":"09:00")+""></div><div class=fd><label>End</label><input type=time id=mE value=""+(pf?pf.end_time||"10:00":"10:00")+""></div></div></div>"+
@@ -192,13 +192,13 @@ function om(dk,pf){
       "<div class=fd><label>Date</label><input type=date id=mFD value=""+(pf?pf.date||dk:dk)+""></div>"+
       "<div class=fd><label>Deadline</label><input type=date id=mDL value=""+(pf?pf.deadline||"":"")+""></div>"+
       "<div class=fd><label>Est Hours</label><input type=number id=mH min=0 step=0.5 value=""+(pf?pf.est_hours||"":"")+""></div></div>"+
-    "<div class=ma><button class=bc onclick=cm()>Cancel</button><button class=bo onclick=sm()>Save</button></div>";
+    "<div class=ma><button class=bc onclick=cm()>取消</button><button class=bo onclick=sm()>保存</button></div>";
 }
 function tgTP(){var tb=document.getElementById("mTP").value==="timeblock";document.getElementById("mTB").style.display=tb?"":"none";document.getElementById("mFX").style.display=tb?"none":""}
 function cm(){document.getElementById("mbg").classList.add("hidden")}
 function sm(){
   var type=document.getElementById("mTP").value,title=document.getElementById("mT").value.trim();
-  if(!title){alert("Enter title");return}
+  if(!title){alert("请输入任务名称");return}
   var data={id:"p"+Date.now()+Math.random().toString(36).slice(2,6),date:"",title:title,category:document.getElementById("mC").value,type:type,done:0,start_time:null,end_time:null,est_hours:0,deadline:null,created_at:new Date().toISOString()};
   if(type==="timeblock"){
     data.date=document.getElementById("mDate").value;data.start_time=document.getElementById("mS").value||null;data.end_time=document.getElementById("mE").value||null;
@@ -207,37 +207,37 @@ function sm(){
   plans.push(data);savePlans();cm();ra();
 }
 
-function rr(){
+function rr(){chk();
   var m=document.getElementById("main");
-  m.innerHTML="<div class=empty>Loading...</div>";
+  m.innerHTML="<div class=empty>加载中...</div>";
   loadPlans();
-  var review=loadReview(rd),history=getHistory(7);
+  var review=load每日回顾(rd),history=getHistory(7);
   var dayPlans=plans.filter(function(p){return p.date===rd});
   if(!lr||lr.date!==rd)lr={date:rd,reflection:review.reflection||"",tasks:review.tasks.slice()};
   var d=new Date(rd+"T00:00:00"),dl=d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()+" "+D[d.getDay()];
-  var isToday=rd===f(new Date());
+  var is今天=rd===f(new Date());
   var h="<div class=rn><button onclick=cr(-1)>Back</button><span class=rnl>"+dl+"</span>";
-  if(!isToday)h+="<button class=tb onclick=goR()>Today</button>";
+  if(!is今天)h+="<button class=tb onclick=goR()>今天</button>";
   h+="<button onclick=cr(1)>Next</button></div>";
-  if(isToday&&dayPlans.length>0){
-    h+="<div class=card><h3>Today Plans</h3><div class=pr>";
+  if(is今天&&dayPlans.length>0){
+    h+="<div class=card><h3>今日计划（点击完成）</h3><div class=pr>";
     dayPlans.forEach(function(t){var c=CATM[t.category]||CATM["other"];var added=lr.tasks.some(function(rt){return rt.plan_id===t.id});h+="<span class=pi><span style=color:"+c.color+">O</span> "+eh(t.title);if(t.start_time)h+=" "+t.start_time+"-"+t.end_time;if(!added&&!t.done)h+=" <button onclick=qc('"+t.id+"','"+eh(t.title).replace(/'/g,"\'")+"','"+t.category+"',"+(t.est_hours||0)+")>OK</button>";else if(t.done)h+=" <span style=color:var(--gn)>OK</span>";h+="</span>"});
     h+="</div></div>";
   }
-  h+="<div class=card><h3>Record Tasks</h3><div class=fr><input class=ft placeholder="Task" id=rT><select id=rC>"+CATS.map(function(c){return "<option value="+c.id+">"+c.label+"</option>"}).join("")+"</select><input class=fh type=number min=0 step=0.5 placeholder=h id=rH><button class="btn btn-p" onclick=ar()>Add</button></div>";
+  h+="<div class=card><h3>记录任务</h3><div class=fr><input class=ft placeholder="做了什么..." id=rT><select id=rC>"+CATS.map(function(c){return "<option value="+c.id+">"+c.label+"</option>"}).join("")+"</select><input class=fh type=number min=0 step=0.5 placeholder="小时" id=rH><button class="btn btn-p" onclick=ar()>Add</button></div>";
   if(lr.tasks.length>0){h+="<div class=rl>";lr.tasks.forEach(function(t,i){var c=CATM[t.category]||CATM["other"];h+="<div class=ri><span class=rc style=background:"+c.color+">"+c.label+"</span><span class=rt>"+eh(t.title)+"</span><span class=rh>"+t.hours+"h</span><button class=rd onclick=dr("+i+")>x</button></div>"});h+="</div>"}
-  h+="<textarea placeholder="Reflection..." id=rR>"+eh(lr.reflection)+"</textarea><button class="btn btn-p" onclick=sr() style=margin-top:4px>Save Review</button><span class=svd id=rS>Saved</span></div>";
-  if(history.length>0){h+="<div class=card><h3>Recent</h3>";history.forEach(function(rh){var rd2=new Date(rh.date+"T00:00:00");h+="<div class=hi onclick=nr('"+rh.date+"')><span>"+rh.date+" "+D[rd2.getDay()]+"</span><span style=color:var(--t2)>"+rh.task_count+" tasks "+Math.round(rh.total_hours*10)/10+"h"+(rh.reflection?" R":"")+"</span></div>"});h+="</div>"}
+  h+="<textarea placeholder="今天的总结与反思..." id=rR>"+eh(lr.reflection)+"</textarea><button class="btn btn-p" onclick=sr() style=margin-top:4px>Save 每日回顾</button><span class=svd id=rS>已保存</span></div>";
+  if(history.length>0){h+="<div class=card><h3>最近回顾</h3>";history.forEach(function(rh){var rd2=new Date(rh.date+"T00:00:00");h+="<div class=hi onclick=nr('"+rh.date+"')><span>"+rh.date+" "+D[rd2.getDay()]+"</span><span style=color:var(--t2)>"+rh.task_count+" tasks "+Math.round(rh.total_hours*10)/10+"h"+(rh.reflection?" R":"")+"</span></div>"});h+="</div>"}
   m.innerHTML=h;
 }
-function ar(){var t=document.getElementById("rT").value.trim();if(!t){alert("Enter task");return}lr.tasks.push({title:t,category:document.getElementById("rC").value,hours:parseFloat(document.getElementById("rH").value)||0,note:"",plan_id:null});document.getElementById("rT").value="";document.getElementById("rH").value="";rr()}
+function ar(){var t=document.getElementById("rT").value.trim();if(!t){alert("请输入任务描述");return}lr.tasks.push({title:t,category:document.getElementById("rC").value,hours:parseFloat(document.getElementById("rH").value)||0,note:"",plan_id:null});document.getElementById("rT").value="";document.getElementById("rH").value="";rr()}
 function dr(i){lr.tasks.splice(i,1);rr()}
 function qc(id,title,cat,hrs){lr.tasks.push({title:title,category:cat,hours:hrs,note:"",plan_id:id});rr()}
-function sr(){lr.reflection=document.getElementById("rR").value||"";saveReview(rd,lr);document.getElementById("rS").classList.add("show");setTimeout(function(){document.getElementById("rS").classList.remove("show")},2000);ra()}
+function sr(){lr.reflection=document.getElementById("rR").value||"";save每日回顾(rd,lr);document.getElementById("rS").classList.add("show");setTimeout(function(){document.getElementById("rS").classList.remove("show")},2000);ra()}
 
-function rs(){
+function rs(){chk();
   var m=document.getElementById("main");
-  m.innerHTML="<div class=empty>Loading...</div>";
+  m.innerHTML="<div class=empty>加载中...</div>";
   loadPlans();
   var we2=new Date(ws);we2.setDate(we2.getDate()+6);
   var dates=gd(ws).map(function(d){return f(d)});
@@ -251,11 +251,11 @@ function rs(){
   for(var j=0;j<7;j++){var rd2=dates[j],r=rv[rd2];if(r){r.tasks.forEach(function(t){dah[j]+=t.hours||0;tah+=t.hours||0;var c=t.category||"other";ch[c]=(ch[c]||0)+(t.hours||0)})}}
   var cr=tp>0?Math.round(tah/tp*100):0;
   var h="<div class=wn><button onclick=cs(-1)>Back</button><span class=wnl>"+(ws.getMonth()+1)+"/"+ws.getDate()+" - "+(we2.getMonth()+1)+"/"+we2.getDate()+"</span><button onclick=cs(1)>Next</button></div>";
-  h+="<div class=sr><div class=sc><div class=sn>"+Math.round(tp*10)/10+"h</div><div class=sl>Planned</div></div><div class=sc><div class=sn>"+Math.round(tah*10)/10+"h</div><div class=sl>Actual</div></div><div class=sc><div class=sn>"+tdn+"/"+ttp+"</div><div class=sl>Done</div></div><div class=sc><div class=sn>"+cr+"%</div><div class=sl>Rate</div></div></div>";
+  h+="<div class=sr><div class=sc><div class=sn>"+Math.round(tp*10)/10+"h</div><div class=sl>计划</div></div><div class=sc><div class=sn>"+Math.round(tah*10)/10+"h</div><div class=sl>实际</div></div><div class=sc><div class=sn>"+tdn+"/"+ttp+"</div><div class=sl>完成</div></div><div class=sc><div class=sn>"+cr+"%</div><div class=sl>完成率</div></div></div>";
   var cats=CATS.map(function(c){return{label:c.label,color:c.color,h:ch[c.id]||0}}).filter(function(d){return d.h>0}).sort(function(a,b){return b.h-a.h});
-  if(cats.length>0){var mx=Math.max.apply(null,cats.map(function(c){return c.h}));h+="<div class=cs><h3>Category</h3>";cats.forEach(function(c){var pct=Math.round(c.h/mx*100);h+="<div class=br><span class=bl>"+c.label+"</span><span class=bf style=width:"+pct+"%;background:"+c.color+">"+c.h+"h</span></div>"});h+="</div>"}
+  if(cats.length>0){var mx=Math.max.apply(null,cats.map(function(c){return c.h}));h+="<div class=cs><h3>分类分布</h3>";cats.forEach(function(c){var pct=Math.round(c.h/mx*100);h+="<div class=br><span class=bl>"+c.label+"</span><span class=bf style=width:"+pct+"%;background:"+c.color+">"+c.h+"h</span></div>"});h+="</div>"}
   var all=[].concat(dph,dah),mx2=Math.max.apply(null,all.concat([1]));
-  h+="<div class=cs><h3>Daily Plan vs Actual</h3>";
+  h+="<div class=cs><h3>每日计划 vs 实际</h3>";
   for(var k=0;k<7;k++){var pp=Math.round(dph[k]/mx2*100)||0,pa=Math.round(dah[k]/mx2*100)||0;if(dph[k]+dah[k]>0){h+="<div class=br><span class=bl>"+D[new Date(dates[k]+"T00:00:00").getDay()]+"</span><span class=bf style=width:"+pp+"%;background:#c7d2fe;color:#4338ca;margin-right:1px>"+(dph[k]?dph[k]+"h":"")+"</span><span class=bf style=width:"+pa+"%;background:#818cf8>"+(dah[k]?dah[k]+"h":"")+"</span><span style=font-size:8px;color:var(--t3);margin-left:3px>P/A</span></div>"}}
   h+="</div>";m.innerHTML=h;
 }
@@ -265,14 +265,14 @@ function iv(){
   if(!("webkitSpeechRecognition" in window)&&!("SpeechRecognition" in window)){btn.style.display="none";return}
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=new SR();
   rec.lang="zh-CN";rec.interimResults=false;rec.maxAlternatives=1;
-  rec.onresult=function(e){var text=e.results[0][0].transcript;toast("Heard: "+text);btn.classList.remove("listening");if(!API_KEY){toast("Set API key first",true,3000);document.getElementById("setupBg").classList.remove("hidden");return}parseVoice(text).then(function(parsed){toast("Parsed",false,1500);om(parsed.date||f(new Date()),parsed)}).catch(function(err){toast("Parse failed",true,2500)})};
-  rec.onerror=function(e){btn.classList.remove("listening");if(e.error!=="aborted")toast("Voice error",true,2000)};
+  rec.onresult=function(e){var text=e.results[0][0].transcript;toast("识别: "+text);btn.classList.remove("listening");if(!API_KEY){toast("请先设置API密钥",true,3000);document.getElementById("setupBg").classList.remove("hidden");return}parseVoice(text).then(function(parsed){toast("解析成功",false,1500);om(parsed.date||f(new Date()),parsed)}).catch(function(err){toast("解析失败",true,2500)})};
+  rec.onerror=function(e){btn.classList.remove("listening");if(e.error!=="aborted")toast("语音识别失败",true,2000)};
   rec.onend=function(){btn.classList.remove("listening")};
-  btn.addEventListener("click",function(){if(btn.classList.contains("listening")){rec.abort();btn.classList.remove("listening")}else{btn.classList.add("listening");try{rec.start()}catch(e){btn.classList.remove("listening");toast("Cannot start",true,2000)}}});
+  btn.addEventListener("click",function(){if(btn.classList.contains("listening")){rec.abort();btn.classList.remove("listening")}else{btn.classList.add("listening");try{rec.start()}catch(e){btn.classList.remove("listening");toast("无法启动语音",true,2000)}}});
 }
 function toast(msg,isErr,dur){var t=document.getElementById("toast");t.textContent=msg;t.className="toast show"+(isErr?" err":"");clearTimeout(t._to);t._to=setTimeout(function(){t.classList.remove("show")},dur||2000)}
 
-function saveKey(){var k=document.getElementById("apiKeyInput").value.trim();if(!k||!k.startsWith("sk-")){alert("Invalid key");return}API_KEY=k;DB.setItem("wb_key",k);document.getElementById("setupBg").classList.add("hidden");toast("Key saved",false,1500)}
+function saveKey(){var k=document.getElementById("apiKeyInput").value.trim();if(!k||!k.startsWith("sk-")){alert("无效密钥");return}API_KEY=k;DB.setItem("wb_key",k);document.getElementById("setupBg").classList.add("hidden");toast("已保存",false,1500)}
 
 function sw(t){tab=t;var bs=document.querySelectorAll("nav button");for(var i=0;i<bs.length;i++)bs[i].classList.toggle("active",bs[i].dataset.tab===t);ra()}
 function ra(){if(tab==="plan")rp();else if(tab==="review")rr();else rs()}
@@ -287,5 +287,5 @@ if(!API_KEY){API_KEY=presetKey;DB.setItem("wb_key",presetKey)}
 document.getElementById("setupBg").classList.add("hidden");
 iv();ra();
 </script>
-</body>
+<button style="position:fixed;bottom:16px;right:16px;width:44px;height:44px;border-radius:50%;background:var(--s);border:1px solid var(--b);cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.1);z-index:30" onclick="ops()" title="设置">⚙</button></body>
 </html>
